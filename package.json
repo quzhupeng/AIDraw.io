@@ -5,6 +5,9 @@
     "scripts": {
         "dev": "next dev --turbopack --port 6002",
         "build": "next build",
+        "build:cf": "npx opennextjs-cloudflare build",
+        "preview": "npx wrangler dev",
+        "deploy": "npx wrangler deploy",
         "start": "next start --port 6001",
         "lint": "next lint"
     },
@@ -44,6 +47,7 @@
         "zod": "^4.1.12"
     },
     "devDependencies": {
+        "@opennextjs/cloudflare": "^1.13.1",
         "@tailwindcss/postcss": "^4",
         "@types/node": "^20",
         "@types/pako": "^2.0.3",
