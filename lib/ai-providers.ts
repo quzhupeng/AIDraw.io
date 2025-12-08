@@ -260,12 +260,37 @@ export function getAIModelFromSettings(settings: DynamicApiSettings): ModelConfi
       if (!chinaBaseUrl) {
         throw new Error(`Base URL is required for ${provider}`);
       }
+
+      console.log(`[AI Provider] Creating ${provider} client with baseURL: ${chinaBaseUrl}`);
+
       const chinaProvider = createOpenAICompatible({
         name: provider,
         apiKey,
         baseURL: chinaBaseUrl,
+        // 添加超时配置
+        fetch: async (url, init) => {
+          console.log(`[${provider}] Fetching:`, url);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout
+
+          try {
+            const response = await fetch(url, {
+              ...init,
+              signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+            console.log(`[${provider}] Response status:`, response.status);
+            return response;
+          } catch (error) {
+            clearTimeout(timeoutId);
+            console.error(`[${provider}] Fetch error:`, error);
+            throw error;
+          }
+        },
       });
       model = chinaProvider(modelId);
+
+      console.log(`[AI Provider] ${provider} model initialized:`, modelId);
       break;
     }
 

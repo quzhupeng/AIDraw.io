@@ -44,6 +44,7 @@ export default function ChatPanel({ isVisible, onToggleVisibility }: ChatPanelPr
     const [showApiSettings, setShowApiSettings] = useState(false);
 
     const onFetchChart = () => {
+        console.log('[ChatPanel] Fetching chart XML...');
         return Promise.race([
             new Promise<string>((resolve) => {
                 if (resolverRef && "current" in resolverRef) {
@@ -52,9 +53,19 @@ export default function ChatPanel({ isVisible, onToggleVisibility }: ChatPanelPr
                 onExport();
             }),
             new Promise<string>((_, reject) =>
-                setTimeout(() => reject(new Error("Chart export timed out after 10 seconds")), 10000)
+                setTimeout(() => {
+                    console.error('[ChatPanel] Chart export timeout!');
+                    reject(new Error("Chart export timed out after 10 seconds"));
+                }, 10000)
             )
-        ]);
+        ]).then(xml => {
+            console.log('[ChatPanel] Chart XML fetched, length:', xml?.length || 0);
+            return xml;
+        }).catch(error => {
+            console.error('[ChatPanel] Failed to fetch chart:', error);
+            // Return empty string instead of throwing to prevent blocking message send
+            return '';
+        });
     };
     // Add a step counter to track updates
 
