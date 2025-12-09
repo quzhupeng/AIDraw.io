@@ -58,7 +58,7 @@ const DEFAULT_MODELS: Record<ProviderName, string[]> = {
     bedrock: ["anthropic.claude-sonnet-4-5-20250514-v1:0", "anthropic.claude-3-5-sonnet-20241022-v2:0"],
     // 中国大模型
     deepseek: ["deepseek-chat", "deepseek-coder", "deepseek-reasoner"],
-    zhipu: ["glm-4-plus", "glm-4-air", "glm-4-flash", "glm-4v-plus"],
+    zhipu: ["glm-4-plus", "glm-4-air", "glm-4-flash", "glm-4v-plus", "glm-4.6", "glm-4-0520", "glm-4-long"],
     qwen: ["qwen-max", "qwen-plus", "qwen-turbo", "qwen-vl-max"],
     doubao: ["doubao-pro-256k", "doubao-pro-32k", "doubao-lite-32k"],
     moonshot: ["moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k"],
@@ -217,8 +217,8 @@ export function ApiSettingsDialog({ open, onOpenChange }: ApiSettingsDialogProps
                                     localSettings.provider === "ollama"
                                         ? "http://localhost:11434/api"
                                         : localSettings.provider === "openai"
-                                        ? "https://api.openai.com/v1 (default)"
-                                        : "Custom API endpoint"
+                                            ? "https://api.openai.com/v1 (default)"
+                                            : "Custom API endpoint"
                                 }
                             />
                             {localSettings.provider === "openai" && (

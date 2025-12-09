@@ -2,6 +2,20 @@
 
 ## 🔧 已修复的问题
 
+### 最新修复：流式输出卡住/超时问题
+
+修复了智谱 GLM 等模型在 Cloudflare 上流式输出卡住的问题：
+
+1. **增加超时时间**：`maxDuration` 从 60 秒增加到 120 秒
+2. **添加 SSE Headers**：添加 `Cache-Control: no-cache` 和 `X-Accel-Buffering: no` 禁用代理缓冲
+3. **优化 API 请求**：
+   - 增加 fetch 超时到 180 秒
+   - 添加 `Accept: text/event-stream` header
+   - 添加 `Connection: keep-alive` header
+4. **新增 GLM 模型**：添加了 `glm-4.6`、`glm-4-0520`、`glm-4-long` 等模型选项
+
+---
+
 修复了 `ERR_SSL_PROTOCOL_ERROR` 和网络错误问题，通过以下配置更新：
 
 ### 1. Wrangler 配置更新 (`wrangler.jsonc`)

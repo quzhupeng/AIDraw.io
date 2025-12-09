@@ -267,19 +267,27 @@ export function getAIModelFromSettings(settings: DynamicApiSettings): ModelConfi
         name: provider,
         apiKey,
         baseURL: chinaBaseUrl,
-        // 添加超时配置
+        // 添加超时配置和 SSE 优化
         fetch: async (url, init) => {
           console.log(`[${provider}] Fetching:`, url);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout
+          // 增加超时到 3 分钟，以支持长时间的 AI 生成
+          const timeoutId = setTimeout(() => controller.abort(), 180000);
 
           try {
+            // 添加额外的 headers 来优化 SSE 流式传输
+            const headers = new Headers(init?.headers);
+            headers.set('Accept', 'text/event-stream');
+            headers.set('Cache-Control', 'no-cache');
+            headers.set('Connection', 'keep-alive');
+
             const response = await fetch(url, {
               ...init,
+              headers,
               signal: controller.signal,
             });
             clearTimeout(timeoutId);
-            console.log(`[${provider}] Response status:`, response.status);
+            console.log(`[${provider}] Response status:`, response.status, 'Content-Type:', response.headers.get('content-type'));
             return response;
           } catch (error) {
             clearTimeout(timeoutId);

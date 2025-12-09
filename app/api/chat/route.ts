@@ -2,7 +2,8 @@ import { streamText, convertToModelMessages } from 'ai';
 import { getAIModel, getAIModelFromSettings, type DynamicApiSettings } from '@/lib/ai-providers';
 import { z } from "zod";
 
-export const maxDuration = 60;
+// 增加超时时间以支持长时间的 AI 响应（Cloudflare Workers 需要在 wrangler.jsonc 中配置）
+export const maxDuration = 120;
 
 export async function POST(req: Request) {
   const startTime = Date.now();
@@ -378,8 +379,23 @@ IMPORTANT: Keep edits concise:
     }
 
     console.log('[Chat API] Returning stream response, total time:', `${Date.now() - startTime}ms`);
-    return result.toUIMessageStreamResponse({
+
+    // 使用 toUIMessageStreamResponse 并添加自定义 headers
+    // 这些 headers 帮助保持 SSE 连接活跃，防止 Cloudflare 代理超时
+    const streamResponse = result.toUIMessageStreamResponse({
       onError: errorHandler,
+      sendReasoning: true, // 发送推理过程（如果模型支持），产生更多中间数据
+    });
+
+    // 添加自定义 headers 以支持 SSE 和防止缓存
+    const headers = new Headers(streamResponse.headers);
+    headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    headers.set('X-Accel-Buffering', 'no'); // 禁用 Nginx/代理缓冲
+
+    return new Response(streamResponse.body, {
+      status: streamResponse.status,
+      statusText: streamResponse.statusText,
+      headers,
     });
   } catch (error) {
     const elapsed = Date.now() - startTime;
